@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Shop 4DRIP — authenticated resale and our own in-house line. Metro Detroit. Search the catalog, then message us on WhatsApp to lock in your size.">
+<title>Shop — 4DRIP</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,500;0,600;0,700;0,800;1,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  .shop-hero{ padding:44px 0 28px; border-bottom:1px solid var(--border-soft); }
+  .shop-kicker{ font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--teal); margin-bottom:8px; }
+  .shop-title{ font-family:"Anton",sans-serif; font-size:clamp(30px,6vw,46px); text-transform:uppercase; line-height:1; margin:0 0 10px; }
+  .shop-title span{ color:var(--yellow); }
+  .shop-sub{ color:var(--text-muted); font-size:15px; max-width:52ch; }
+
+  .toolbar{ position:sticky; top:65px; z-index:30; background:var(--bg); padding:18px 0 16px; border-bottom:1px solid var(--border-soft); }
+  .search-row{ display:flex; gap:10px; margin-bottom:14px; }
+  .search-input{
+    flex:1; background:var(--bg-1); border:1px solid var(--border); border-radius:2px;
+    padding:12px 14px; color:var(--text); font-size:14px;
+  }
+  .search-input::placeholder{ color:var(--text-faint); }
+  .search-input:focus{ outline:none; border-color:var(--teal); }
+  .pills{ display:flex; gap:8px; flex-wrap:wrap; }
+  .pill{
+    font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:0.05em; text-transform:uppercase;
+    padding:8px 13px; border:1px solid var(--border); border-radius:100px; color:var(--text-muted);
+    transition:all .15s ease;
+  }
+  .pill:hover{ border-color:var(--text-faint); color:var(--text); }
+  .pill.active{ background:var(--yellow); color:var(--yellow-ink); border-color:var(--yellow); font-weight:600; }
+  .result-count{ margin-top:12px; font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-faint); }
+
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:16px; padding:28px 0 20px; }
+  .card{
+    background:var(--bg-1); border:1px solid var(--border); border-radius:3px; overflow:hidden;
+    display:flex; flex-direction:column; transition:transform .15s ease, border-color .15s ease;
+  }
+  .card:hover{ transform:translateY(-3px); border-color:var(--text-faint); }
+  .card-img{ position:relative; aspect-ratio:1/1; background:var(--bg-2); }
+  .card-img img{ width:100%; height:100%; object-fit:cover; }
+  .card-img .noimg{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--text-faint); font-family:"JetBrains Mono",monospace; font-size:11px; text-transform:uppercase; }
+  .badge{
+    position:absolute; top:10px; left:10px; font-family:"JetBrains Mono",monospace; font-size:9.5px; letter-spacing:0.06em; text-transform:uppercase;
+    padding:5px 9px; border-radius:100px; background:rgba(13,12,11,0.82); color:var(--text); border:1px solid var(--border);
+  }
+  .badge.available{ color:var(--green); border-color:rgba(63,185,95,0.4); }
+  .badge.few{ color:var(--orange); border-color:rgba(255,189,89,0.4); }
+  .badge.sold{ color:var(--text-faint); }
+  .card-body{ padding:14px 14px 16px; display:flex; flex-direction:column; gap:6px; flex:1; }
+  .card-brand{ font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); }
+  .card-name{ font-family:"Anton",sans-serif; font-size:15.5px; text-transform:uppercase; line-height:1.2; }
+  .card-meta{ font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--text-muted); margin-top:2px; }
+  .card-cta{
+    margin-top:auto; padding-top:10px;
+    display:flex; align-items:center; justify-content:center; gap:7px;
+    font-family:"JetBrains Mono",monospace; font-size:11.5px; letter-spacing:0.05em; text-transform:uppercase; font-weight:600;
+    background:var(--yellow); color:var(--yellow-ink); padding:11px 12px; border-radius:2px;
+    transition:filter .12s ease;
+  }
+  .card-cta:hover{ filter:brightness(0.95); }
+
+  .state{ padding:60px 20px; text-align:center; color:var(--text-faint); }
+  .state .t{ font-family:"Anton",sans-serif; font-size:20px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px; }
+  .state .s{ font-size:13.5px; max-width:44ch; margin:0 auto; }
+
+  .skel{ background:linear-gradient(100deg, var(--bg-1) 30%, var(--bg-2) 50%, var(--bg-1) 70%); background-size:220% 100%; animation:shimmer 1.3s ease-in-out infinite; }
+  @keyframes shimmer{ 0%{background-position:120% 0;} 100%{background-position:-20% 0;} }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a class="nav-brand" href="index.html"><img src="assets/logo.png" alt=""><span>4DRIP</span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="shop.html" class="active">Shop</a>
+      <a class="cta" href="https://wa.me/15865535504?text=Hi%2C%20I%27m%20interested%20in..." target="_blank" rel="noopener">WhatsApp</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="shop-hero">
+    <div class="shop-kicker">Your fashion plug &middot; Metro Detroit</div>
+    <h1 class="shop-title">Yeah.<br><span>We got that.</span></h1>
+    <p class="shop-sub">Authenticated resale plus our own line. Find something you like, then message us on WhatsApp — we'll confirm sizing and availability directly.</p>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-row">
+      <input class="search-input" id="search" type="text" placeholder="Search brand, item, size, or SKU&hellip;" autocomplete="off">
+    </div>
+    <div class="pills" id="pills"></div>
+    <div class="result-count" id="result-count"></div>
+  </div>
+
+  <div id="grid" class="grid"></div>
+</div>
+
+<a class="wa-float" href="https://wa.me/15865535504?text=Hi%2C%20I%27m%20interested%20in..." target="_blank" rel="noopener">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.48 1.34 4.99L2 22l5.2-1.36a9.94 9.94 0 0 0 4.84 1.23h.01c5.5 0 9.96-4.46 9.96-9.96S17.55 2 12.04 2zm0 18.18h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.09.81.82-3-.2-.31a8.22 8.22 0 0 1-1.26-4.39c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.55-3.7 8.24-8.24 8.24zm4.52-6.17c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.13-.17.24-.64.8-.78.97-.14.16-.29.18-.53.06-.25-.12-1.05-.39-1.99-1.24-.74-.66-1.23-1.47-1.38-1.72-.14-.24-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.42.08-.16.04-.31-.02-.43-.06-.12-.56-1.36-.77-1.86-.2-.49-.4-.42-.56-.43h-.48c-.16 0-.43.06-.66.31-.22.24-.86.85-.86 2.07 0 1.22.89 2.4 1.02 2.57.12.16 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.16-.48-.28z"/></svg>
+  WhatsApp 4DRIP
+</a>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <img src="assets/logo.png" alt="">
+      <div>
+        <div class="foot-line">4DRIP &middot; Metro Detroit</div>
+        <div class="foot-tag">It's in you, not on you.</div>
+      </div>
+    </div>
+    <div class="foot-links">
+      <a href="index.html">Home</a>
+      <a href="https://www.instagram.com/4drip313/" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://wa.me/15865535504" target="_blank" rel="noopener">WhatsApp</a>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-client.js"></script>
+<script>
+  let ALL = [];
+  let activeCat = "All";
+  let searchTerm = "";
+
+  function escapeHtml(s){
+    return String(s || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  function statusClass(p){
+    if ((p.stock ?? 0) <= 0 || /sold/i.test(p.status || "")) return "sold";
+    if (/few/i.test(p.status || "")) return "few";
+    return "available";
+  }
+  function statusLabel(p){
+    if ((p.stock ?? 0) <= 0 || /sold/i.test(p.status || "")) return "Sold";
+    return p.status || "Available";
+  }
+
+  function categories(){
+    const set = new Set(ALL.map(p => p.category).filter(Boolean));
+    return ["All", ...Array.from(set).sort()];
+  }
+
+  function renderPills(){
+    const cats = categories();
+    document.getElementById("pills").innerHTML = cats.map(c =>
+      `<button class="pill${c === activeCat ? " active" : ""}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`
+    ).join("");
+    document.querySelectorAll(".pill").forEach(btn => {
+      btn.addEventListener("click", () => { activeCat = btn.dataset.cat; render(); });
+    });
+  }
+
+  function visible(){
+    const q = searchTerm.trim().toLowerCase();
+    return ALL.filter(p => {
+      if (activeCat !== "All" && p.category !== activeCat) return false;
+      if (!q) return true;
+      const hay = [p.brand, p.name, p.category, p.sku, (p.sizes || []).join(" ")].join(" ").toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  function cardHtml(p){
+    const img = (p.images && p.images[0]) ? productImageUrl(p.images[0]) : "";
+    const sizes = (p.sizes && p.sizes.length) ? p.sizes.join(" &middot; ") : "One size";
+    return `
+      <div class="card">
+        <div class="card-img">
+          ${img ? `<img src="${img}" alt="${escapeHtml(p.brand + ' ' + p.name)}" loading="lazy">` : `<div class="noimg">No photo yet</div>`}
+          <span class="badge ${statusClass(p)}">${escapeHtml(statusLabel(p))}</span>
+        </div>
+        <div class="card-body">
+          <div class="card-brand">${escapeHtml(p.brand)}</div>
+          <div class="card-name">${escapeHtml(p.name)}</div>
+          <div class="card-meta">${sizes} &middot; SKU ${escapeHtml(p.sku)}</div>
+          <a class="card-cta" href="${waProductLink(p)}" target="_blank" rel="noopener">Ask on WhatsApp &rarr;</a>
+        </div>
+      </div>`;
+  }
+
+  function render(){
+    renderPills();
+    const items = visible();
+    const grid = document.getElementById("grid");
+    document.getElementById("result-count").textContent = `${items.length} item${items.length === 1 ? "" : "s"}`;
+    if (!items.length){
+      grid.innerHTML = "";
+      grid.insertAdjacentHTML("afterend", "");
+      document.getElementById("grid").innerHTML = `
+        <div class="state" style="grid-column:1/-1;">
+          <div class="t">Nothing matches yet</div>
+          <div class="s">Try a different search, or ask us directly — a lot of what we carry isn't posted yet.</div>
+        </div>`;
+      return;
+    }
+    grid.innerHTML = items.map(cardHtml).join("");
+  }
+
+  function renderSkeleton(){
+    document.getElementById("grid").innerHTML = Array.from({length:8}).map(() => `
+      <div class="card">
+        <div class="card-img skel"></div>
+        <div class="card-body">
+          <div class="skel" style="height:10px; width:40%; border-radius:2px;"></div>
+          <div class="skel" style="height:16px; width:70%; border-radius:2px; margin-top:6px;"></div>
+          <div class="skel" style="height:38px; width:100%; border-radius:2px; margin-top:12px;"></div>
+        </div>
+      </div>`).join("");
+  }
+
+  async function load(){
+    renderSkeleton();
+    const { data, error } = await db
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error){
+      document.getElementById("grid").innerHTML = `
+        <div class="state" style="grid-column:1/-1;">
+          <div class="t">Couldn't load the catalog</div>
+          <div class="s">${escapeHtml(error.message)}</div>
+        </div>`;
+      return;
+    }
+    ALL = data || [];
+    render();
+  }
+
+  document.getElementById("search").addEventListener("input", e => {
+    searchTerm = e.target.value;
+    render();
+  });
+
+  load();
+</script>
+</body>
+</html>

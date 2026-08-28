@@ -1,0 +1,91 @@
+/* 4DRIP shared design tokens — pulled verbatim from the 4DRIP Design Guide */
+:root{
+  --bg:#0D0C0B;
+  --bg-1:#171512;
+  --bg-2:#211D18;
+  --border:#332E27;
+  --border-soft:#231F1A;
+  --text:#F4EFE4;
+  --text-muted:#AEA294;
+  --text-faint:#6E6459;
+  --yellow:#FFDE59;
+  --orange:#FFBD59;
+  --teal:#5CE1E6;
+  --yellow-ink:#3A3005;
+  --green:#3FB95F;
+}
+
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:"Archivo","Helvetica Neue",Arial,sans-serif;
+  font-size:16px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+}
+a{color:inherit; text-decoration:none;}
+img{max-width:100%; display:block;}
+button, input, select, textarea{font:inherit; color:inherit;}
+button{background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left;}
+::selection{ background:var(--yellow); color:var(--yellow-ink); }
+
+.mono{ font-family:"JetBrains Mono",monospace; }
+.wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
+
+/* ---------- NAV ---------- */
+.site-nav{
+  position:sticky; top:0; z-index:40;
+  background:rgba(13,12,11,0.92); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border-soft);
+}
+.site-nav .wrap{ display:flex; align-items:center; justify-content:space-between; gap:18px; padding-top:14px; padding-bottom:14px; }
+.nav-brand{ display:flex; align-items:center; gap:10px; }
+.nav-brand img{ width:28px; height:28px; }
+.nav-brand span{ font-family:"Anton",sans-serif; font-size:16px; letter-spacing:0.02em; }
+.nav-links{ display:flex; align-items:center; gap:22px; }
+.nav-links a{
+  font-family:"JetBrains Mono",monospace; font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase;
+  color:var(--text-muted); transition:color .15s ease;
+}
+.nav-links a:hover, .nav-links a.active{ color:var(--text); }
+.nav-links a.cta{
+  color:var(--yellow-ink); background:var(--yellow); padding:9px 14px; border-radius:2px; font-weight:600;
+}
+.nav-loc{ display:flex; align-items:center; gap:8px; font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-faint); }
+.nav-loc .dot{ width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 0 3px rgba(63,185,95,0.18); }
+
+/* ---------- FOOTER ---------- */
+.site-foot{ margin-top:64px; border-top:1px solid var(--border-soft); }
+.site-foot .wrap{ padding-top:32px; padding-bottom:32px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+.site-foot img{ width:24px; opacity:0.85; }
+.foot-line{ font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-faint); }
+.foot-tag{ font-size:12.5px; color:var(--text-faint); }
+.foot-links{ display:flex; gap:16px; }
+.foot-links a{ font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-faint); }
+.foot-links a:hover{ color:var(--text-muted); }
+
+/* ---------- WHATSAPP FLOATING BUTTON ---------- */
+.wa-float{
+  position:fixed; right:18px; bottom:18px; z-index:50;
+  display:flex; align-items:center; gap:9px;
+  background:var(--yellow); color:var(--yellow-ink);
+  padding:13px 18px 13px 15px; border-radius:100px;
+  font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:0.04em; text-transform:uppercase; font-weight:600;
+  box-shadow:0 14px 30px -10px rgba(0,0,0,0.6);
+  transition:transform .15s ease;
+}
+.wa-float:hover{ transform:translateY(-2px); }
+.wa-float svg{ width:17px; height:17px; }
+
+@media (max-width:720px){
+  .nav-links{ gap:14px; }
+  .nav-links a:not(.cta){ display:none; }
+  .nav-loc{ display:none; }
+}
