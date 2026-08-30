@@ -351,8 +351,15 @@
     return p.status || "Available";
   }
 
+  // A product's category field can hold several categories separated by commas
+  // (e.g. "Hoodies, Streetwear") — split it out wherever we need the individual list.
+  function splitCategories(cat){
+    return String(cat || "").split(",").map(s => s.trim()).filter(Boolean);
+  }
+
   function categories(){
-    const set = new Set(ALL.map(p => p.category).filter(Boolean));
+    const set = new Set();
+    ALL.forEach(p => splitCategories(p.category).forEach(c => set.add(c)));
     return ["All", ...Array.from(set).sort()];
   }
 
@@ -369,7 +376,7 @@
   function visible(){
     const q = searchTerm.trim().toLowerCase();
     return ALL.filter(p => {
-      if (activeCat !== "All" && p.category !== activeCat) return false;
+      if (activeCat !== "All" && !splitCategories(p.category).includes(activeCat)) return false;
       if (!q) return true;
       const hay = [p.brand, p.name, p.category, p.sku, (p.sizes || []).join(" ")].join(" ").toLowerCase();
       return hay.includes(q);

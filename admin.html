@@ -155,7 +155,7 @@
         <div class="field"><label>SKU</label><input id="qu-new-sku" placeholder="4D-2014"></div>
         <div class="field"><label>Brand</label><input id="qu-new-brand" placeholder="Moncler"></div>
         <div class="field"><label>Product name</label><input id="qu-new-name" placeholder="Down Puffer"></div>
-        <div class="field"><label>Category</label><input id="qu-new-category" placeholder="Outerwear"></div>
+        <div class="field"><label>Category (comma-separated for multiple)</label><input id="qu-new-category" placeholder="Outerwear, Streetwear"></div>
         <div class="field"><label>Sizes</label><input id="qu-new-sizes" placeholder="S/M/L/XL"></div>
         <div class="field"><label>Quantity</label><input id="qu-new-qty" type="number" min="0" value="1"></div>
         <div class="field"><label>Condition</label><input id="qu-new-condition" placeholder="Fresh outta box never worn"></div>
@@ -180,7 +180,7 @@
 
     <div class="card-block">
       <h2>1 &middot; Upload CSV <span style="color:var(--text-faint); font-weight:400; text-transform:none;">(for bulk imports &mdash; optional if you're just adding photos above)</span></h2>
-      <div class="desc">Required columns: <b class="mono">SKU, Brand, Product Name, Category, Sizes, Quantity, Condition</b>. Optional: <b class="mono">Fit, Description, Status, Images</b>. Sizes separated by / or , &mdash; Images is a semicolon-separated list of photo filenames to match.</div>
+      <div class="desc">Required columns: <b class="mono">SKU, Brand, Product Name, Category, Sizes, Quantity, Condition</b>. Optional: <b class="mono">Fit, Description, Status, Images</b>. Category can list more than one, separated by commas (e.g. "Hoodies, Streetwear") &mdash; each shows as its own filter on the shop page. Sizes separated by / or , &mdash; Images is a semicolon-separated list of photo filenames to match.</div>
       <div class="upload-row">
         <button class="btn small file-btn">Choose CSV<input type="file" id="csv-input" accept=".csv"></button>
         <button class="btn ghost small" id="download-template">Download CSV template</button>
