@@ -42,8 +42,17 @@
   }
   .card:hover{ transform:translateY(-3px); border-color:var(--text-faint); }
   .card-img{ position:relative; aspect-ratio:1/1; background:var(--bg-2); }
-  .card-img img{ width:100%; height:100%; object-fit:cover; }
+  .card-img img{ width:100%; height:100%; object-fit:cover; cursor:zoom-in; }
   .card-img .noimg{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--text-faint); font-family:"JetBrains Mono",monospace; font-size:11px; text-transform:uppercase; }
+  .select-btn{
+    position:absolute; top:10px; right:10px; width:30px; height:30px; border-radius:50%; z-index:2;
+    background:rgba(13,12,11,0.75); border:1.5px solid var(--border); color:var(--text);
+    display:flex; align-items:center; justify-content:center; font-family:"JetBrains Mono",monospace; font-size:15px; font-weight:600;
+    transition:all .15s ease;
+  }
+  .select-btn:hover{ border-color:var(--yellow); }
+  .select-btn.active{ background:var(--yellow); border-color:var(--yellow); color:var(--yellow-ink); }
+  .card.selected{ border-color:var(--yellow); }
   .badge{
     position:absolute; top:10px; left:10px; font-family:"JetBrains Mono",monospace; font-size:9.5px; letter-spacing:0.06em; text-transform:uppercase;
     padding:5px 9px; border-radius:100px; background:rgba(13,12,11,0.82); color:var(--text); border:1px solid var(--border);
@@ -70,6 +79,54 @@
 
   .skel{ background:linear-gradient(100deg, var(--bg-1) 30%, var(--bg-2) 50%, var(--bg-1) 70%); background-size:220% 100%; animation:shimmer 1.3s ease-in-out infinite; }
   @keyframes shimmer{ 0%{background-position:120% 0;} 100%{background-position:-20% 0;} }
+
+  /* ---------- LIGHTBOX ---------- */
+  .lightbox{
+    position:fixed; inset:0; z-index:90; background:rgba(9,8,7,0.94);
+    display:none; align-items:center; justify-content:center; padding:28px;
+  }
+  .lightbox.open{ display:flex; }
+  .lightbox img{ max-width:92vw; max-height:88vh; width:auto; height:auto; object-fit:contain; border-radius:4px; cursor:default; }
+  .lightbox-close{
+    position:absolute; top:18px; right:18px; width:42px; height:42px; border-radius:50%;
+    background:rgba(255,255,255,0.08); color:var(--text); font-size:24px; line-height:1;
+    display:flex; align-items:center; justify-content:center; border:1px solid var(--border);
+  }
+  .lightbox-close:hover{ background:rgba(255,255,255,0.16); }
+
+  /* ---------- CART DOCK ---------- */
+  .cart-dock{ position:fixed; left:0; right:0; bottom:0; z-index:70; display:none; }
+  .cart-dock.open{ display:block; }
+  .cart-drawer{ max-height:0; overflow:hidden; transition:max-height .2s ease; background:var(--bg-1); border-top:1px solid var(--border-soft); }
+  .cart-drawer.open{ max-height:260px; overflow-y:auto; }
+  .cart-drawer-inner{ padding:12px 16px; max-width:1180px; margin:0 auto; display:flex; flex-direction:column; }
+  .cart-item-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; padding:8px 0; border-bottom:1px solid var(--border-soft); }
+  .cart-item-row:last-child{ border-bottom:none; }
+  .cart-item-remove{ font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-faint); flex-shrink:0; }
+  .cart-item-remove:hover{ color:var(--text); }
+  .cart-bar{
+    background:var(--bg-1); border-top:1px solid var(--border); padding:12px 16px;
+    display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    box-shadow:0 -8px 24px -12px rgba(0,0,0,0.6);
+  }
+  .cart-bar .wrap{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; width:100%; padding:0; }
+  .cart-summary{ display:flex; align-items:center; gap:9px; font-family:"JetBrains Mono",monospace; font-size:12.5px; letter-spacing:0.03em; text-transform:uppercase; color:var(--text-muted); }
+  .cart-count-badge{ background:var(--yellow); color:var(--yellow-ink); border-radius:100px; padding:3px 9px; font-weight:700; font-size:11px; }
+  .cart-summary:hover{ color:var(--text); }
+  .cart-actions{ display:flex; align-items:center; gap:16px; }
+  .cart-clear-btn{ font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-faint); }
+  .cart-clear-btn:hover{ color:var(--text-muted); }
+  .cart-quote-btn{
+    display:flex; align-items:center; gap:8px; background:var(--yellow); color:var(--yellow-ink);
+    font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:0.04em; text-transform:uppercase; font-weight:600;
+    padding:12px 18px; border-radius:2px; transition:filter .12s ease;
+  }
+  .cart-quote-btn:hover{ filter:brightness(0.95); }
+  .cart-quote-btn svg{ width:16px; height:16px; }
+  body.cart-open .wa-float{ bottom:76px; }
+  @media (max-width:560px){
+    .cart-actions{ width:100%; justify-content:space-between; }
+  }
 </style>
 </head>
 <body>
@@ -103,6 +160,31 @@
   <div id="grid" class="grid"></div>
 </div>
 
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" aria-label="Close">&times;</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<div class="cart-dock" id="cart-dock">
+  <div class="cart-drawer" id="cart-drawer">
+    <div class="cart-drawer-inner" id="cart-drawer-inner"></div>
+  </div>
+  <div class="cart-bar">
+    <div class="wrap">
+      <button class="cart-summary" id="cart-toggle">
+        <span class="cart-count-badge" id="cart-count">0</span> selected &middot; tap to view
+      </button>
+      <div class="cart-actions">
+        <button class="cart-clear-btn" id="cart-clear">Clear all</button>
+        <a class="cart-quote-btn" id="cart-quote-link" href="#" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.48 1.34 4.99L2 22l5.2-1.36a9.94 9.94 0 0 0 4.84 1.23h.01c5.5 0 9.96-4.46 9.96-9.96S17.55 2 12.04 2zm0 18.18h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.09.81.82-3-.2-.31a8.22 8.22 0 0 1-1.26-4.39c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.55-3.7 8.24-8.24 8.24zm4.52-6.17c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.13-.17.24-.64.8-.78.97-.14.16-.29.18-.53.06-.25-.12-1.05-.39-1.99-1.24-.74-.66-1.23-1.47-1.38-1.72-.14-.24-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.42.08-.16.04-.31-.02-.43-.06-.12-.56-1.36-.77-1.86-.2-.49-.4-.42-.56-.43h-.48c-.16 0-.43.06-.66.31-.22.24-.86.85-.86 2.07 0 1.22.89 2.4 1.02 2.57.12.16 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.16-.48-.28z"/></svg>
+          Get quote on WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <a class="wa-float" href="https://wa.me/15865535504?text=Hi%2C%20I%27m%20interested%20in..." target="_blank" rel="noopener">
   <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.48 1.34 4.99L2 22l5.2-1.36a9.94 9.94 0 0 0 4.84 1.23h.01c5.5 0 9.96-4.46 9.96-9.96S17.55 2 12.04 2zm0 18.18h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.09.81.82-3-.2-.31a8.22 8.22 0 0 1-1.26-4.39c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.55-3.7 8.24-8.24 8.24zm4.52-6.17c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.13-.17.24-.64.8-.78.97-.14.16-.29.18-.53.06-.25-.12-1.05-.39-1.99-1.24-.74-.66-1.23-1.47-1.38-1.72-.14-.24-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.42.08-.16.04-.31-.02-.43-.06-.12-.56-1.36-.77-1.86-.2-.49-.4-.42-.56-.43h-.48c-.16 0-.43.06-.66.31-.22.24-.86.85-.86 2.07 0 1.22.89 2.4 1.02 2.57.12.16 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.16-.48-.28z"/></svg>
   WhatsApp 4DRIP
@@ -131,6 +213,76 @@
   let ALL = [];
   let activeCat = "All";
   let searchTerm = "";
+
+  // ---------- Cart (multi-select quote request) ----------
+  const CART_KEY = "4drip_cart_v1";
+  let cart = new Set();
+  let drawerOpen = false;
+
+  function loadCart(){
+    try {
+      const raw = localStorage.getItem(CART_KEY);
+      if (raw) JSON.parse(raw).forEach(sku => cart.add(sku));
+    } catch(e){ /* storage unavailable — cart just won't persist across reloads */ }
+  }
+  function saveCart(){
+    try { localStorage.setItem(CART_KEY, JSON.stringify(Array.from(cart))); } catch(e){}
+  }
+  function toggleCartItem(sku){
+    if (!sku) return;
+    if (cart.has(sku)) cart.delete(sku); else cart.add(sku);
+    saveCart();
+    render();
+  }
+  function removeCartItem(sku){
+    cart.delete(sku);
+    if (!cart.size) drawerOpen = false;
+    saveCart();
+    render();
+  }
+  function clearCart(){
+    cart.clear();
+    drawerOpen = false;
+    saveCart();
+    render();
+  }
+  function cartProducts(){
+    return Array.from(cart).map(sku => ALL.find(p => p.sku === sku)).filter(Boolean);
+  }
+  function buildQuoteMessage(){
+    const items = cartProducts();
+    if (!items.length) return "";
+    const lines = items.map((p, i) => {
+      const sizes = (p.sizes && p.sizes.length) ? ` (${p.sizes.join(", ")})` : "";
+      return `${i + 1}. ${p.brand} ${p.name} — SKU ${p.sku}${sizes}`;
+    });
+    return `Hey 4DRIP, I'd like a quote for:\n\n${lines.join("\n")}\n\nLet me know pricing and availability!`;
+  }
+  function updateCartUI(){
+    const items = cartProducts();
+    document.body.classList.toggle("cart-open", items.length > 0);
+    document.getElementById("cart-dock").classList.toggle("open", items.length > 0);
+    document.getElementById("cart-drawer").classList.toggle("open", drawerOpen && items.length > 0);
+    document.getElementById("cart-count").textContent = items.length;
+    document.getElementById("cart-quote-link").href = items.length ? waLink(buildQuoteMessage()) : "#";
+    document.getElementById("cart-drawer-inner").innerHTML = items.map(p => `
+      <div class="cart-item-row">
+        <span>${escapeHtml(p.brand)} ${escapeHtml(p.name)} <span class="mono" style="color:var(--text-faint);">&middot; ${escapeHtml(p.sku)}</span></span>
+        <button class="cart-item-remove" data-remove-sku="${escapeHtml(p.sku)}">Remove</button>
+      </div>`).join("");
+  }
+
+  // ---------- Lightbox (click a photo to expand it) ----------
+  function openLightbox(src, alt){
+    if (!src) return;
+    document.getElementById("lightbox-img").src = src;
+    document.getElementById("lightbox-img").alt = alt || "";
+    document.getElementById("lightbox").classList.add("open");
+  }
+  function closeLightbox(){
+    document.getElementById("lightbox").classList.remove("open");
+    document.getElementById("lightbox-img").src = "";
+  }
 
   function escapeHtml(s){
     return String(s || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -174,11 +326,13 @@
   function cardHtml(p){
     const img = (p.images && p.images[0]) ? productImageUrl(p.images[0]) : "";
     const sizes = (p.sizes && p.sizes.length) ? p.sizes.join(" &middot; ") : "One size";
+    const inCart = cart.has(p.sku);
     return `
-      <div class="card">
+      <div class="card${inCart ? " selected" : ""}" data-sku="${escapeHtml(p.sku)}">
         <div class="card-img">
           ${img ? `<img src="${img}" alt="${escapeHtml(p.brand + ' ' + p.name)}" loading="lazy">` : `<div class="noimg">No photo yet</div>`}
           <span class="badge ${statusClass(p)}">${escapeHtml(statusLabel(p))}</span>
+          <button class="select-btn${inCart ? " active" : ""}" data-action="toggle-cart" title="${inCart ? "Remove from quote" : "Add to quote"}" aria-label="${inCart ? "Remove from quote" : "Add to quote"}">${inCart ? "&#10003;" : "+"}</button>
         </div>
         <div class="card-body">
           <div class="card-brand">${escapeHtml(p.brand)}</div>
@@ -205,6 +359,7 @@
       return;
     }
     grid.innerHTML = items.map(cardHtml).join("");
+    updateCartUI();
   }
 
   function renderSkeleton(){
@@ -242,6 +397,49 @@
     render();
   });
 
+  // ---------- Wire up cart + lightbox interactions ----------
+  document.getElementById("grid").addEventListener("click", (e) => {
+    const selectBtn = e.target.closest(".select-btn");
+    if (selectBtn){
+      e.preventDefault();
+      e.stopPropagation();
+      const card = selectBtn.closest(".card");
+      if (card) toggleCartItem(card.dataset.sku);
+      return;
+    }
+    const img = e.target.closest(".card-img img");
+    if (img){
+      e.preventDefault();
+      openLightbox(img.src, img.getAttribute("alt"));
+    }
+  });
+
+  document.getElementById("lightbox").addEventListener("click", (e) => {
+    if (e.target.id === "lightbox" || e.target.closest(".lightbox-close")) closeLightbox();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeLightbox();
+  });
+
+  document.getElementById("cart-dock").addEventListener("click", (e) => {
+    const removeBtn = e.target.closest("[data-remove-sku]");
+    if (removeBtn){
+      removeCartItem(removeBtn.dataset.removeSku);
+      return;
+    }
+    if (e.target.closest("#cart-clear")){
+      clearCart();
+      return;
+    }
+    if (e.target.closest("#cart-toggle")){
+      drawerOpen = !drawerOpen;
+      updateCartUI();
+      return;
+    }
+  });
+
+  loadCart();
   load();
 </script>
 </body>
