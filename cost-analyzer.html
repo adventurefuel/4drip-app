@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Cost Analyzer — 4DRIP</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,500;0,600;0,700;0,800;1,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  .panel{ max-width:520px; margin:70px auto; background:var(--bg-1); border:1px solid var(--border); border-radius:4px; padding:30px 28px; }
+  .panel h1{ font-family:"Anton",sans-serif; font-size:22px; text-transform:uppercase; margin:0 0 6px; }
+  .panel .sub{ color:var(--text-muted); font-size:13.5px; margin-bottom:22px; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-faint); margin-bottom:6px; }
+  .field input{ width:100%; background:var(--bg-2); border:1px solid var(--border); border-radius:2px; padding:11px 12px; color:var(--text); font-size:14px; }
+  .field input:focus{ outline:none; border-color:var(--teal); }
+  .field .hint{ font-size:11.5px; color:var(--text-faint); margin-top:5px; }
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:0.05em; text-transform:uppercase; font-weight:600; padding:12px 18px; border-radius:2px; background:var(--yellow); color:var(--yellow-ink); width:100%; }
+  .btn:hover{ filter:brightness(0.95); }
+  .btn.ghost{ background:transparent; border:1px solid var(--border); color:var(--text-muted); font-weight:500; }
+  .btn.small{ width:auto; padding:9px 13px; font-size:11px; }
+  .toggle-row{ margin-top:14px; text-align:center; font-size:12.5px; color:var(--text-faint); }
+  .toggle-row button{ color:var(--teal); text-decoration:underline; }
+  .msg{ font-size:13px; padding:11px 13px; border-radius:2px; margin-bottom:14px; }
+  .msg.err{ background:rgba(220,80,80,0.1); color:#e88; border:1px solid rgba(220,80,80,0.3); }
+  .msg.ok{ background:rgba(63,185,95,0.1); color:var(--green); border:1px solid rgba(63,185,95,0.3); }
+  .hidden{ display:none !important; }
+
+  .admin-wrap{ padding:34px 0 60px; }
+  .admin-head{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:28px; flex-wrap:wrap; }
+  .admin-head h1{ font-family:"Anton",sans-serif; font-size:24px; text-transform:uppercase; margin:0; }
+  .admin-head .who{ font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--text-faint); }
+  .admin-head .who b{ color:var(--text-muted); }
+  .head-links{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .head-links a{ font-family:"JetBrains Mono",monospace; font-size:11.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--teal); }
+  .head-links a:hover{ text-decoration:underline; }
+
+  .card-block{ background:var(--bg-1); border:1px solid var(--border); border-radius:4px; padding:22px 22px 24px; margin-bottom:22px; }
+  .card-block h2{ font-family:"Anton",sans-serif; font-size:16.5px; text-transform:uppercase; margin:0 0 4px; }
+  .card-block .desc{ color:var(--text-faint); font-size:12.5px; margin-bottom:16px; }
+
+  /* ---------- CALCULATOR ---------- */
+  .calc-grid{ display:grid; grid-template-columns:1fr; gap:20px; align-items:start; }
+  @media (min-width:860px){
+    .calc-grid{ grid-template-columns:minmax(0,360px) 1fr; }
+    .calc-results{ position:sticky; top:84px; }
+  }
+  .calc-inputs .field-2col{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .input-dollar{ position:relative; }
+  .input-dollar span{ position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-faint); font-size:14px; pointer-events:none; }
+  .input-dollar input{ padding-left:24px; }
+  .input-pct{ position:relative; }
+  .input-pct span{ position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--text-faint); font-size:14px; pointer-events:none; }
+  .input-pct input{ padding-right:26px; }
+
+  .calc-results .card-block{ margin-bottom:16px; }
+  .stat-hero{ text-align:center; padding:6px 0 4px; }
+  .stat-hero .label{ font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); margin-bottom:6px; }
+  .stat-hero .value{ font-family:"Anton",sans-serif; font-size:44px; color:var(--yellow); line-height:1; }
+  .stat-hero .value.editable{ cursor:text; border-bottom:1.5px dashed var(--border); padding:0 4px 4px; }
+  .stat-hero .value.editable:focus{ outline:none; border-color:var(--teal); color:var(--text); }
+  .stat-hero .sub{ font-size:11.5px; color:var(--text-faint); margin-top:8px; }
+  .stat-hero .sub button{ color:var(--teal); text-decoration:underline; }
+
+  .breakdown{ display:flex; flex-direction:column; }
+  .brow{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 0; border-top:1px solid var(--border-soft); font-size:13.5px; }
+  .brow:first-child{ border-top:none; }
+  .brow .k{ color:var(--text-muted); }
+  .brow .v{ font-family:"JetBrains Mono",monospace; color:var(--text); }
+  .brow.total .k{ color:var(--text); font-weight:600; }
+  .brow.total .v{ font-size:15px; font-weight:700; }
+  .brow.neg .v{ color:#e88; }
+  .brow.pos .v{ color:var(--green); }
+
+  .margin-wrap{ margin-top:6px; }
+  .margin-top-row{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px; }
+  .margin-pct{ font-family:"Anton",sans-serif; font-size:30px; }
+  .margin-pill{ font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase; padding:5px 10px; border-radius:100px; font-weight:700; }
+  .margin-pill.good{ background:rgba(63,185,95,0.15); color:var(--green); border:1px solid rgba(63,185,95,0.35); }
+  .margin-pill.warn{ background:rgba(255,189,89,0.15); color:var(--orange); border:1px solid rgba(255,189,89,0.35); }
+  .margin-pill.bad{ background:rgba(220,80,80,0.12); color:#e88; border:1px solid rgba(220,80,80,0.3); }
+  .gauge{ height:10px; border-radius:100px; background:var(--bg-2); border:1px solid var(--border-soft); position:relative; overflow:hidden; }
+  .gauge-fill{ height:100%; border-radius:100px; background:var(--text-faint); transition:width .2s ease, background .2s ease; }
+  .gauge-fill.good{ background:var(--green); }
+  .gauge-fill.warn{ background:var(--orange); }
+  .gauge-fill.bad{ background:#c85555; }
+  .gauge-target{ position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--text); }
+  .gauge-labels{ display:flex; justify-content:space-between; font-family:"JetBrains Mono",monospace; font-size:10px; color:var(--text-faint); margin-top:6px; }
+
+  .target-callout{
+    background:var(--bg-2); border:1.5px dashed var(--teal); border-radius:4px; padding:16px 18px;
+    display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  }
+  .target-callout .tc-label{ font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--teal); margin-bottom:4px; }
+  .target-callout .tc-value{ font-family:"Anton",sans-serif; font-size:24px; }
+  .target-callout .tc-note{ font-size:11.5px; color:var(--text-faint); margin-top:3px; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a class="nav-brand" href="index.html"><img src="assets/logo.png" alt=""><span>4DRIP</span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="#" id="signout-link" class="hidden">Sign out</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ AUTH GATE ============ -->
+<div id="auth-gate" class="panel">
+  <h1>Admin sign in</h1>
+  <div class="sub">Cost analyzer — Tarmale &amp; Jay only.</div>
+  <div id="auth-msg"></div>
+
+  <form id="signin-form">
+    <div class="field"><label>Email</label><input type="email" id="si-email" required autocomplete="username"></div>
+    <div class="field"><label>Password</label><input type="password" id="si-password" required autocomplete="current-password"></div>
+    <button class="btn" type="submit">Sign in</button>
+  </form>
+
+  <form id="signup-form" class="hidden">
+    <div class="field"><label>Email</label><input type="email" id="su-email" required autocomplete="username"></div>
+    <div class="field"><label>Create password</label><input type="password" id="su-password" required minlength="8" autocomplete="new-password"></div>
+    <button class="btn" type="submit">Create account</button>
+  </form>
+
+  <div class="toggle-row">
+    <span id="toggle-to-signup">First time here? <button type="button" onclick="showSignup()">Create an account</button></span>
+    <span id="toggle-to-signin" class="hidden">Already have an account? <button type="button" onclick="showSignin()">Sign in</button></span>
+  </div>
+</div>
+
+<!-- ============ PENDING APPROVAL ============ -->
+<div id="pending-gate" class="panel hidden">
+  <h1>Account pending approval</h1>
+  <div class="sub">You're signed in, but this account hasn't been given access yet.</div>
+  <div class="msg ok">Send this to Tarmale or Jay so they can approve you:<br><b id="pending-email" class="mono"></b></div>
+  <button class="btn ghost" onclick="signOut()">Sign out</button>
+</div>
+
+<!-- ============ CALCULATOR APP ============ -->
+<div id="admin-app" class="admin-wrap hidden">
+  <div class="wrap">
+    <div class="admin-head">
+      <h1>Cost Analyzer</h1>
+      <div class="head-links">
+        <div class="who">Signed in as <b id="who-email"></b></div>
+        <a href="admin.html">Bulk Inventory &rarr;</a>
+      </div>
+    </div>
+
+    <div class="card-block">
+      <h2>Price a piece</h2>
+      <div class="desc">Enter every cost that goes into a piece, and this shows exactly what to charge to land your target margin &mdash; after fees, not before.</div>
+
+      <div class="calc-grid">
+        <div class="calc-inputs">
+          <div class="field">
+            <label>Cost of product</label>
+            <div class="input-dollar"><span>$</span><input type="number" id="c-product" min="0" step="0.01" value="0" inputmode="decimal"></div>
+            <div class="hint">What you paid for the item itself.</div>
+          </div>
+          <div class="field">
+            <label>Acquisition cost</label>
+            <div class="input-dollar"><span>$</span><input type="number" id="c-acquisition" min="0" step="0.01" value="0" inputmode="decimal"></div>
+            <div class="hint">Sourcing/cop fees, travel, marketplace fees to acquire it &mdash; if separate from the cost above.</div>
+          </div>
+          <div class="field">
+            <label>Shipping cost</label>
+            <div class="input-dollar"><span>$</span><input type="number" id="c-shipping" min="0" step="0.01" value="0" inputmode="decimal"></div>
+            <div class="hint">What it costs you to get it to the customer.</div>
+          </div>
+          <div class="field-2col">
+            <div class="field">
+              <label>Transaction fee</label>
+              <div class="input-pct"><input type="number" id="c-fee" min="0" step="0.1" value="3" inputmode="decimal"><span>%</span></div>
+              <div class="hint">CashApp/Venmo/card cut.</div>
+            </div>
+            <div class="field">
+              <label>Profit markup</label>
+              <div class="input-pct"><input type="number" id="c-markup" min="0" step="1" value="100" inputmode="decimal"><span>%</span></div>
+              <div class="hint">Your standard is 100%.</div>
+            </div>
+          </div>
+          <button class="btn ghost small" id="reset-btn" type="button" style="width:100%; margin-top:4px;">Reset all fields</button>
+        </div>
+
+        <div class="calc-results">
+          <div class="card-block">
+            <div class="stat-hero">
+              <div class="label">Sale price</div>
+              <div class="value editable" id="r-price" contenteditable="true" spellcheck="false">$0.00</div>
+              <div class="sub" id="r-price-sub">at 100% markup &middot; <button type="button" id="r-price-reset">reset to markup price</button></div>
+            </div>
+          </div>
+
+          <div class="card-block">
+            <h2>What you'd net</h2>
+            <div class="breakdown">
+              <div class="brow"><span class="k">Total cost (product + acquisition + shipping)</span><span class="v" id="r-total-cost">$0.00</span></div>
+              <div class="brow neg"><span class="k">Transaction fee</span><span class="v" id="r-fee">&minus;$0.00</span></div>
+              <div class="brow total pos"><span class="k">Net profit</span><span class="v" id="r-net-profit">$0.00</span></div>
+            </div>
+
+            <div class="margin-wrap">
+              <div class="margin-top-row">
+                <span class="margin-pct" id="r-margin-pct">0%</span>
+                <span class="margin-pill" id="r-margin-pill">&mdash;</span>
+              </div>
+              <div class="gauge"><div class="gauge-fill" id="r-gauge-fill" style="width:0%;"></div><div class="gauge-target" style="left:50%;"></div></div>
+              <div class="gauge-labels"><span>0%</span><span>50% target</span><span>100%</span></div>
+            </div>
+          </div>
+
+          <div class="card-block" style="margin-bottom:0;">
+            <div class="target-callout">
+              <div>
+                <div class="tc-label">Price for exactly 50% net margin</div>
+                <div class="tc-value" id="r-target-price">$0.00</div>
+                <div class="tc-note">Accounts for the transaction fee &mdash; this is the real break-even for your target.</div>
+              </div>
+              <button class="btn small" id="use-target-btn" type="button">Use this price</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-client.js"></script>
+<script>
+  let session = null;
+  let isAdmin = false;
+  const $ = id => document.getElementById(id);
+
+  function show(id){ $(id).classList.remove("hidden"); }
+  function hide(id){ $(id).classList.add("hidden"); }
+
+  function showSignup(){ hide("signin-form"); show("signup-form"); hide("toggle-to-signup"); show("toggle-to-signin"); }
+  function showSignin(){ show("signin-form"); hide("signup-form"); show("toggle-to-signup"); hide("toggle-to-signin"); }
+
+  function authMsg(text, cls){
+    $("auth-msg").innerHTML = text ? `<div class="msg ${cls}">${text}</div>` : "";
+  }
+
+  async function init(){
+    const { data } = await db.auth.getSession();
+    session = data.session;
+    await refreshGate();
+
+    db.auth.onAuthStateChange((_event, sess) => {
+      session = sess;
+      refreshGate();
+    });
+  }
+
+  async function refreshGate(){
+    hide("auth-gate"); hide("pending-gate"); hide("admin-app");
+    $("signout-link").classList.add("hidden");
+
+    if (!session){
+      show("auth-gate");
+      return;
+    }
+
+    const { data: adminRow } = await db.from("admins").select("id").eq("id", session.user.id).maybeSingle();
+    isAdmin = !!adminRow;
+
+    if (!isAdmin){
+      $("pending-email").textContent = session.user.email;
+      show("pending-gate");
+      return;
+    }
+
+    $("who-email").textContent = session.user.email;
+    $("signout-link").classList.remove("hidden");
+    show("admin-app");
+    recalc();
+  }
+
+  $("signin-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    authMsg("", "");
+    const { error } = await db.auth.signInWithPassword({ email: $("si-email").value, password: $("si-password").value });
+    if (error) authMsg(error.message, "err");
+  });
+
+  $("signup-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    authMsg("", "");
+    const { data, error } = await db.auth.signUp({ email: $("su-email").value, password: $("su-password").value });
+    if (error){ authMsg(error.message, "err"); return; }
+    if (data.session){
+      authMsg("Account created.", "ok");
+    } else {
+      authMsg("Account created — check your email to confirm, then sign in.", "ok");
+      showSignin();
+    }
+  });
+
+  async function signOut(){ await db.auth.signOut(); }
+  $("signout-link").addEventListener("click", e => { e.preventDefault(); signOut(); });
+
+  /* ---------------- Cost analyzer ---------------- */
+  function num(v){
+    const n = parseFloat(String(v).replace(/[^0-9.\-]/g, ""));
+    return (isNaN(n) || n < 0) ? 0 : n;
+  }
+  function money(n){
+    return `$${n.toFixed(2)}`;
+  }
+
+  let priceEditedByUser = false;
+
+  function markupPrice(){
+    const totalCost = num($("c-product").value) + num($("c-acquisition").value) + num($("c-shipping").value);
+    const markupPct = num($("c-markup").value) / 100;
+    return totalCost * (1 + markupPct);
+  }
+
+  function recalc(){
+    const productCost = num($("c-product").value);
+    const acquisition = num($("c-acquisition").value);
+    const shipping = num($("c-shipping").value);
+    const feePct = num($("c-fee").value) / 100;
+    const markupPct = num($("c-markup").value) / 100;
+    const totalCost = productCost + acquisition + shipping;
+
+    if (!priceEditedByUser){
+      $("r-price").textContent = money(totalCost * (1 + markupPct));
+    }
+    const salePrice = num($("r-price").textContent);
+
+    const feeAmount = salePrice * feePct;
+    const netProfit = salePrice - totalCost - feeAmount;
+    const netMarginPct = salePrice > 0 ? (netProfit / salePrice) * 100 : 0;
+
+    $("r-price-sub").innerHTML = priceEditedByUser
+      ? `custom price &middot; <button type="button" id="r-price-reset">reset to markup price</button>`
+      : `at ${$("c-markup").value || 0}% markup &middot; <button type="button" id="r-price-reset">reset to markup price</button>`;
+    $("r-price-reset").addEventListener("click", () => {
+      priceEditedByUser = false;
+      recalc();
+    });
+
+    $("r-total-cost").textContent = money(totalCost);
+    $("r-fee").textContent = `−${money(feeAmount)}`;
+    $("r-net-profit").textContent = money(netProfit);
+    $("r-net-profit").parentElement.classList.toggle("neg", netProfit < 0);
+    $("r-net-profit").parentElement.classList.toggle("pos", netProfit >= 0);
+
+    $("r-margin-pct").textContent = `${netMarginPct.toFixed(1)}%`;
+
+    const pill = $("r-margin-pill");
+    const fill = $("r-gauge-fill");
+    const clamped = Math.max(0, Math.min(100, netMarginPct));
+    fill.style.width = `${clamped}%`;
+    [pill, fill].forEach(el => el.classList.remove("good", "warn", "bad"));
+    let tier;
+    if (netMarginPct >= 50) tier = "good";
+    else if (netMarginPct >= 35) tier = "warn";
+    else tier = "bad";
+    pill.classList.add(tier);
+    fill.classList.add(tier);
+    pill.textContent = netMarginPct >= 50 ? "Hits 50% target" : `${(50 - netMarginPct).toFixed(1)}pt short of target`;
+
+    // Price required for exactly 50% net margin, accounting for the transaction fee
+    const targetMargin = 0.5;
+    const denom = 1 - targetMargin - feePct;
+    const targetPrice = denom > 0 ? totalCost / denom : null;
+    $("r-target-price").textContent = targetPrice !== null ? money(targetPrice) : "n/a";
+    $("use-target-btn").disabled = targetPrice === null;
+  }
+
+  ["c-product", "c-acquisition", "c-shipping", "c-fee", "c-markup"].forEach(id => {
+    $(id).addEventListener("input", recalc);
+  });
+
+  $("r-price").addEventListener("input", () => {
+    priceEditedByUser = true;
+    recalc();
+  });
+  $("r-price").addEventListener("blur", () => {
+    $("r-price").textContent = money(num($("r-price").textContent));
+  });
+
+  $("use-target-btn").addEventListener("click", () => {
+    const target = $("r-target-price").textContent;
+    if (target === "n/a") return;
+    $("r-price").textContent = target;
+    priceEditedByUser = true;
+    recalc();
+  });
+
+  $("reset-btn").addEventListener("click", () => {
+    $("c-product").value = 0;
+    $("c-acquisition").value = 0;
+    $("c-shipping").value = 0;
+    $("c-fee").value = 3;
+    $("c-markup").value = 100;
+    priceEditedByUser = false;
+    recalc();
+  });
+
+  init();
+</script>
+</body>
+</html>

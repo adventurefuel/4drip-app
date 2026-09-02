@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — 4DRIP</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,500;0,600;0,700;0,800;1,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  .panel{ max-width:520px; margin:70px auto; background:var(--bg-1); border:1px solid var(--border); border-radius:4px; padding:30px 28px; }
+  .panel h1{ font-family:"Anton",sans-serif; font-size:22px; text-transform:uppercase; margin:0 0 6px; }
+  .panel .sub{ color:var(--text-muted); font-size:13.5px; margin-bottom:22px; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-faint); margin-bottom:6px; }
+  .field input{ width:100%; background:var(--bg-2); border:1px solid var(--border); border-radius:2px; padding:11px 12px; color:var(--text); font-size:14px; }
+  .field input:focus{ outline:none; border-color:var(--teal); }
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:0.05em; text-transform:uppercase; font-weight:600; padding:12px 18px; border-radius:2px; background:var(--yellow); color:var(--yellow-ink); width:100%; }
+  .btn:hover{ filter:brightness(0.95); }
+  .btn.ghost{ background:transparent; border:1px solid var(--border); color:var(--text-muted); font-weight:500; }
+  .btn.small{ width:auto; padding:9px 13px; font-size:11px; }
+  .toggle-row{ margin-top:14px; text-align:center; font-size:12.5px; color:var(--text-faint); }
+  .toggle-row button{ color:var(--teal); text-decoration:underline; }
+  .msg{ font-size:13px; padding:11px 13px; border-radius:2px; margin-bottom:14px; }
+  .msg.err{ background:rgba(220,80,80,0.1); color:#e88; border:1px solid rgba(220,80,80,0.3); }
+  .msg.ok{ background:rgba(63,185,95,0.1); color:var(--green); border:1px solid rgba(63,185,95,0.3); }
+
+  .hidden{ display:none !important; }
+
+  .admin-wrap{ padding:34px 0 60px; }
+  .admin-head{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:28px; flex-wrap:wrap; }
+  .admin-head h1{ font-family:"Anton",sans-serif; font-size:24px; text-transform:uppercase; margin:0; }
+  .admin-head .who{ font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--text-faint); }
+  .admin-head .who b{ color:var(--text-muted); }
+
+  .card-block{ background:var(--bg-1); border:1px solid var(--border); border-radius:4px; padding:22px 22px 24px; margin-bottom:22px; }
+  .card-block h2{ font-family:"Anton",sans-serif; font-size:16.5px; text-transform:uppercase; margin:0 0 4px; }
+  .card-block .desc{ color:var(--text-faint); font-size:12.5px; margin-bottom:16px; }
+
+  .upload-row{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .file-btn{ position:relative; overflow:hidden; }
+  .file-btn input[type=file]{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+
+  .stat-row{ display:flex; gap:22px; margin:16px 0; flex-wrap:wrap; }
+  .stat{ font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--text-muted); }
+  .stat b{ color:var(--text); font-size:15px; display:block; font-family:"Anton",sans-serif; }
+
+  table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  th{ text-align:left; font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-faint); padding:8px 10px; border-bottom:1px solid var(--border); }
+  td{ padding:9px 10px; border-bottom:1px solid var(--border-soft); vertical-align:middle; }
+  td.imgcell{ width:44px; }
+  td.imgcell img{ width:36px; height:36px; object-fit:cover; border-radius:2px; }
+  .row-ok{ color:var(--green); }
+  .row-warn{ color:var(--orange); }
+  tr.invalid{ opacity:0.5; }
+  .tbl-wrap{ overflow-x:auto; max-height:420px; overflow-y:auto; border:1px solid var(--border-soft); border-radius:2px; }
+  input.stock-edit, select.status-edit{ width:64px; background:var(--bg-2); border:1px solid var(--border); color:var(--text); padding:5px 6px; font-size:12px; border-radius:2px; }
+  select.status-edit{ width:auto; }
+  .icon-btn{ font-family:"JetBrains Mono",monospace; font-size:10.5px; text-transform:uppercase; color:var(--text-faint); }
+  .icon-btn:hover{ color:#e88; }
+
+  /* Quick upload */
+  .mode-toggle{ display:inline-flex; border:1px solid var(--border); border-radius:2px; overflow:hidden; margin-bottom:16px; }
+  .mode-toggle button{ font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:0.05em; text-transform:uppercase; padding:9px 16px; color:var(--text-faint); background:var(--bg-2); }
+  .mode-toggle button.active{ background:var(--yellow); color:var(--yellow-ink); font-weight:600; }
+  .qu-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:12px; margin-bottom:14px; }
+  .qu-grid .field{ margin-bottom:0; }
+  .qu-grid select{ width:100%; background:var(--bg-2); border:1px solid var(--border); border-radius:2px; padding:11px 12px; color:var(--text); font-size:14px; }
+  .qu-dropzone{ border:1.5px dashed var(--border); border-radius:4px; padding:22px; text-align:center; color:var(--text-faint); font-size:12.5px; cursor:pointer; position:relative; transition:border-color .15s; }
+  .qu-dropzone.drag{ border-color:var(--teal); color:var(--teal); }
+  .qu-dropzone input[type=file]{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .qu-thumbs{ display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+  .qu-thumb{ position:relative; width:74px; height:74px; border-radius:3px; overflow:hidden; background:var(--bg-2); border:1px solid var(--border-soft); }
+  .qu-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .qu-thumb .rm{ position:absolute; top:2px; right:2px; width:18px; height:18px; line-height:18px; text-align:center; background:rgba(13,12,11,0.75); color:var(--text); border-radius:50%; font-size:12px; cursor:pointer; }
+  .qu-thumb .rm:hover{ color:#e88; }
+  .qu-note{ font-size:11.5px; color:var(--text-faint); margin-top:10px; }
+  .checkbox-row{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text-muted); margin:12px 0; }
+  .checkbox-row input{ width:auto; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a class="nav-brand" href="index.html"><img src="assets/logo.png" alt=""><span>4DRIP</span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="#" id="signout-link" class="hidden">Sign out</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ AUTH GATE ============ -->
+<div id="auth-gate" class="panel">
+  <h1>Admin sign in</h1>
+  <div class="sub">Bulk inventory tools — Tarmale &amp; Jay only.</div>
+  <div id="auth-msg"></div>
+
+  <form id="signin-form">
+    <div class="field"><label>Email</label><input type="email" id="si-email" required autocomplete="username"></div>
+    <div class="field"><label>Password</label><input type="password" id="si-password" required autocomplete="current-password"></div>
+    <button class="btn" type="submit">Sign in</button>
+  </form>
+
+  <form id="signup-form" class="hidden">
+    <div class="field"><label>Email</label><input type="email" id="su-email" required autocomplete="username"></div>
+    <div class="field"><label>Create password</label><input type="password" id="su-password" required minlength="8" autocomplete="new-password"></div>
+    <button class="btn" type="submit">Create account</button>
+  </form>
+
+  <div class="toggle-row">
+    <span id="toggle-to-signup">First time here? <button type="button" onclick="showSignup()">Create an account</button></span>
+    <span id="toggle-to-signin" class="hidden">Already have an account? <button type="button" onclick="showSignin()">Sign in</button></span>
+  </div>
+</div>
+
+<!-- ============ PENDING APPROVAL ============ -->
+<div id="pending-gate" class="panel hidden">
+  <h1>Account pending approval</h1>
+  <div class="sub">You're signed in, but this account hasn't been given inventory-editing access yet.</div>
+  <div class="msg ok">Send this to Tarmale or Jay so they can approve you:<br><b id="pending-email" class="mono"></b></div>
+  <button class="btn ghost" onclick="signOut()">Sign out</button>
+</div>
+
+<!-- ============ ADMIN APP ============ -->
+<div id="admin-app" class="admin-wrap hidden">
+  <div class="wrap">
+    <div class="admin-head">
+      <h1>Bulk Inventory</h1>
+      <div class="who">Signed in as <b id="who-email"></b> &middot; <a href="cost-analyzer.html" style="color:var(--teal); text-decoration:underline;">Cost Analyzer</a> &middot; <a href="#" id="signout-link-2" style="color:var(--teal); text-decoration:underline;">sign out</a></div>
+    </div>
+
+    <div class="card-block">
+      <h2>Quick photo upload</h2>
+      <div class="desc">Add 1&ndash;10 photos straight to a listing &mdash; no CSV needed. Photos are auto-resized to a consistent, clean size for the shop (aspect ratio always preserved, never stretched or squished).</div>
+
+      <div class="mode-toggle">
+        <button type="button" id="qu-mode-existing" class="active">Add to existing item</button>
+        <button type="button" id="qu-mode-new">Create new item</button>
+      </div>
+
+      <div id="qu-existing-fields" class="qu-grid">
+        <div class="field" style="grid-column:1/-1;">
+          <label>Item</label>
+          <select id="qu-sku-select"></select>
+        </div>
+      </div>
+
+      <div id="qu-new-fields" class="qu-grid hidden">
+        <div class="field"><label>SKU</label><input id="qu-new-sku" placeholder="4D-2014"></div>
+        <div class="field"><label>Brand</label><input id="qu-new-brand" placeholder="Moncler"></div>
+        <div class="field"><label>Product name</label><input id="qu-new-name" placeholder="Down Puffer"></div>
+        <div class="field"><label>Category (comma-separated for multiple)</label><input id="qu-new-category" placeholder="Outerwear, Streetwear"></div>
+        <div class="field"><label>Sizes</label><input id="qu-new-sizes" placeholder="S/M/L/XL"></div>
+        <div class="field"><label>Quantity</label><input id="qu-new-qty" type="number" min="0" value="1"></div>
+        <div class="field"><label>Condition</label><input id="qu-new-condition" placeholder="Fresh outta box never worn"></div>
+      </div>
+
+      <label class="qu-dropzone" id="qu-dropzone">
+        <span id="qu-dropzone-text">Click to choose photos, or drag &amp; drop &mdash; up to 10</span>
+        <input type="file" id="qu-photo-input" accept="image/*" multiple>
+      </label>
+      <div class="qu-thumbs" id="qu-thumbs"></div>
+
+      <div class="checkbox-row" id="qu-replace-row">
+        <input type="checkbox" id="qu-replace" checked>
+        <label for="qu-replace">Replace this item's existing photos (uncheck to add alongside them)</label>
+      </div>
+
+      <div style="margin-top:14px; display:flex; gap:12px; align-items:center;">
+        <button class="btn" id="qu-upload-btn" style="width:auto; padding:12px 22px;">Upload photos</button>
+        <span id="qu-status" class="mono" style="font-size:12px; color:var(--text-faint);"></span>
+      </div>
+    </div>
+
+    <div class="card-block">
+      <h2>1 &middot; Upload CSV <span style="color:var(--text-faint); font-weight:400; text-transform:none;">(for bulk imports &mdash; optional if you're just adding photos above)</span></h2>
+      <div class="desc">Required columns: <b class="mono">SKU, Brand, Product Name, Category, Sizes, Quantity, Condition</b>. Optional: <b class="mono">Fit, Description, Status, Images</b>. Category can list more than one, separated by commas (e.g. "Hoodies, Streetwear") &mdash; each shows as its own filter on the shop page. Sizes separated by / or , &mdash; Images is a semicolon-separated list of photo filenames to match.</div>
+      <div class="upload-row">
+        <button class="btn small file-btn">Choose CSV<input type="file" id="csv-input" accept=".csv"></button>
+        <button class="btn ghost small" id="download-template">Download CSV template</button>
+        <span id="csv-filename" class="mono" style="font-size:11.5px; color:var(--text-faint);"></span>
+      </div>
+    </div>
+
+    <div class="card-block">
+      <h2>2 &middot; Upload photos</h2>
+      <div class="desc">Name files starting with the SKU (e.g. <b class="mono">4D-1001-front.jpg</b>) and they'll auto-match, or reference exact filenames in the CSV's Images column. Every photo is auto-resized and re-encoded to a consistent, clean size on publish &mdash; same as Quick Upload.</div>
+      <div class="upload-row">
+        <button class="btn small file-btn">Choose photos<input type="file" id="photo-input" accept="image/*" multiple></button>
+        <span id="photo-count" class="mono" style="font-size:11.5px; color:var(--text-faint);"></span>
+      </div>
+    </div>
+
+    <div class="card-block" id="preview-block" style="display:none;">
+      <h2>3 &middot; Review &amp; publish</h2>
+      <div class="stat-row">
+        <div class="stat"><b id="stat-total">0</b>rows</div>
+        <div class="stat"><b id="stat-valid">0</b>ready</div>
+        <div class="stat"><b id="stat-matched">0</b>with photo</div>
+        <div class="stat"><b id="stat-invalid">0</b>need fixing</div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th></th><th>SKU</th><th>Brand</th><th>Name</th><th>Category</th><th>Sizes</th><th>Qty</th><th>Status</th></tr></thead>
+          <tbody id="preview-tbody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:16px; display:flex; gap:12px; align-items:center;">
+        <button class="btn" id="publish-btn" style="width:auto; padding:12px 22px;">Publish to store</button>
+        <span id="publish-status" class="mono" style="font-size:12px; color:var(--text-faint);"></span>
+      </div>
+    </div>
+
+    <div class="card-block">
+      <h2>Current inventory <span id="inv-count" class="mono" style="color:var(--text-faint); font-size:11px;"></span></h2>
+      <div class="desc">Live from the store &mdash; edit stock/status or remove a listing.</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th></th><th>SKU</th><th>Brand / Name</th><th>Sizes</th><th>Stock</th><th>Status</th><th></th></tr></thead>
+          <tbody id="inv-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-client.js"></script>
+<script>
+  let session = null;
+  let isAdmin = false;
+  let parsedRows = [];
+  let photoFiles = [];
+  let inventoryCache = [];
+  let quFiles = [];
+
+  const $ = id => document.getElementById(id);
+
+  function show(id){ $(id).classList.remove("hidden"); }
+  function hide(id){ $(id).classList.add("hidden"); }
+
+  function showSignup(){ hide("signin-form"); show("signup-form"); hide("toggle-to-signup"); show("toggle-to-signin"); }
+  function showSignin(){ show("signin-form"); hide("signup-form"); show("toggle-to-signup"); hide("toggle-to-signin"); }
+
+  function authMsg(text, cls){
+    $("auth-msg").innerHTML = text ? `<div class="msg ${cls}">${text}</div>` : "";
+  }
+
+  async function init(){
+    const { data } = await db.auth.getSession();
+    session = data.session;
+    await refreshGate();
+
+    db.auth.onAuthStateChange((_event, sess) => {
+      session = sess;
+      refreshGate();
+    });
+  }
+
+  async function refreshGate(){
+    hide("auth-gate"); hide("pending-gate"); hide("admin-app");
+    $("signout-link").classList.add("hidden");
+
+    if (!session){
+      show("auth-gate");
+      return;
+    }
+
+    const { data: adminRow } = await db.from("admins").select("id").eq("id", session.user.id).maybeSingle();
+    isAdmin = !!adminRow;
+
+    if (!isAdmin){
+      $("pending-email").textContent = session.user.email;
+      show("pending-gate");
+      return;
+    }
+
+    $("who-email").textContent = session.user.email;
+    $("signout-link").classList.remove("hidden");
+    show("admin-app");
+    loadInventory();
+  }
+
+  $("signin-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    authMsg("", "");
+    const { error } = await db.auth.signInWithPassword({ email: $("si-email").value, password: $("si-password").value });
+    if (error) authMsg(error.message, "err");
+  });
+
+  $("signup-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    authMsg("", "");
+    const { data, error } = await db.auth.signUp({ email: $("su-email").value, password: $("su-password").value });
+    if (error){ authMsg(error.message, "err"); return; }
+    if (data.session){
+      authMsg("Account created.", "ok");
+    } else {
+      authMsg("Account created — check your email to confirm, then sign in.", "ok");
+      showSignin();
+    }
+  });
+
+  async function signOut(){
+    await db.auth.signOut();
+  }
+  $("signout-link").addEventListener("click", e => { e.preventDefault(); signOut(); });
+  $("signout-link-2").addEventListener("click", e => { e.preventDefault(); signOut(); });
+
+  /* ---------------- CSV parsing (hand-rolled, handles quoted fields) ---------------- */
+  function parseCSV(text){
+    const rows = [];
+    let row = [], field = "", inQuotes = false;
+    for (let i = 0; i < text.length; i++){
+      const c = text[i], next = text[i+1];
+      if (inQuotes){
+        if (c === '"' && next === '"'){ field += '"'; i++; }
+        else if (c === '"'){ inQuotes = false; }
+        else field += c;
+      } else {
+        if (c === '"') inQuotes = true;
+        else if (c === ','){ row.push(field); field = ""; }
+        else if (c === '\n'){ row.push(field); rows.push(row); row = []; field = ""; }
+        else if (c === '\r'){ /* skip */ }
+        else field += c;
+      }
+    }
+    if (field.length || row.length){ row.push(field); rows.push(row); }
+    if (!rows.length) return [];
+    const headers = rows[0].map(h => h.trim());
+    return rows.slice(1).filter(r => r.some(c => c && c.trim())).map(r => {
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = (r[i] || "").trim());
+      return obj;
+    });
+  }
+
+  function csvEscape(v){
+    v = String(v ?? "");
+    return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+  }
+
+  function downloadTemplate(){
+    const headers = ["SKU","Brand","Product Name","Category","Sizes","Quantity","Condition","Fit","Description","Status","Images"];
+    const rows = [
+      ["4D-1001","Essentials","Boxy Hoodie","Hoodies","S/M/L/XL","4","Fresh outta box never worn","Relaxed","Heavyweight cotton fleece.","Available","4D-1001-front.jpg"],
+      ["4D-1002","Moncler","Down Puffer","Jackets","M/L","1","Fresh outta box never worn","True to size","",  "Few available",""],
+      ["4D-1003","Balenciaga","Triple S","Shoes","9/10/11","2","Excellent, worn twice","","","Available",""]
+    ];
+    const csv = [headers, ...rows].map(r => r.map(csvEscape).join(",")).join("\n");
+    downloadBlob(csv, "4DRIP_inventory_template.csv", "text/csv");
+  }
+
+  function downloadBlob(content, filename, type){
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function normalize(s){ return String(s || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
+
+  function matchImages(sku, imagesField){
+    const wantExact = (imagesField || "").split(";").map(s => s.trim()).filter(Boolean);
+    const bySku = photoFiles.filter(f => normalize(f.name).startsWith(normalize(sku)));
+    const byName = photoFiles.filter(f => wantExact.includes(f.name));
+    const combined = [...byName, ...bySku].filter((f, i, arr) => arr.indexOf(f) === i);
+    return combined;
+  }
+
+  function productFromRow(r){
+    const sku = r["SKU"] || "";
+    const sizes = (r["Sizes"] || "").split(/[\/,;]+/).map(s => s.trim()).filter(Boolean);
+    const qty = parseInt(r["Quantity"], 10) || 0;
+    const status = r["Status"] || (qty <= 3 ? "Few available" : "Available");
+    return {
+      sku, brand: r["Brand"] || "", name: r["Product Name"] || "", category: r["Category"] || "Uncategorized",
+      sizes, stock: qty, condition: r["Condition"] || "", fit: r["Fit"] || "", description: r["Description"] || "",
+      status, imagesField: r["Images"] || "",
+    };
+  }
+
+  function rowValid(p){ return !!(p.sku && p.brand && p.name); }
+
+  function renderPreview(){
+    if (!parsedRows.length){ $("preview-block").style.display = "none"; return; }
+    $("preview-block").style.display = "block";
+    const tbody = $("preview-tbody");
+    let valid = 0, matched = 0;
+    tbody.innerHTML = parsedRows.map(p => {
+      const files = matchImages(p.sku, p.imagesField);
+      const ok = rowValid(p);
+      if (ok) valid++;
+      if (files.length) matched++;
+      const thumb = files[0] ? `<img src="${URL.createObjectURL(files[0])}" style="width:32px;height:32px;object-fit:cover;border-radius:2px;">` : "&mdash;";
+      return `<tr class="${ok ? "" : "invalid"}">
+        <td class="imgcell">${thumb}</td>
+        <td class="mono">${escapeHtml(p.sku)}</td>
+        <td>${escapeHtml(p.brand)}</td>
+        <td>${escapeHtml(p.name)}</td>
+        <td>${escapeHtml(p.category)}</td>
+        <td class="mono">${escapeHtml(p.sizes.join("/"))}</td>
+        <td>${p.stock}</td>
+        <td class="${ok ? "row-ok" : "row-warn"}">${ok ? escapeHtml(p.status) : "missing fields"}</td>
+      </tr>`;
+    }).join("");
+    $("stat-total").textContent = parsedRows.length;
+    $("stat-valid").textContent = valid;
+    $("stat-matched").textContent = matched;
+    $("stat-invalid").textContent = parsedRows.length - valid;
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  $("csv-input").addEventListener("change", async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    $("csv-filename").textContent = file.name;
+    const text = await file.text();
+    parsedRows = parseCSV(text).map(productFromRow);
+    renderPreview();
+  });
+
+  $("photo-input").addEventListener("change", e => {
+    photoFiles = Array.from(e.target.files);
+    $("photo-count").textContent = `${photoFiles.length} photo${photoFiles.length === 1 ? "" : "s"} selected`;
+    renderPreview();
+  });
+
+  $("download-template").addEventListener("click", downloadTemplate);
+
+  $("publish-btn").addEventListener("click", async () => {
+    const btn = $("publish-btn");
+    const statusEl = $("publish-status");
+    const valid = parsedRows.filter(rowValid);
+    if (!valid.length){ statusEl.textContent = "No valid rows to publish."; return; }
+    btn.disabled = true;
+    let done = 0, failed = 0;
+    for (const p of valid){
+      statusEl.textContent = `Publishing ${p.sku}&hellip; (${done + failed + 1}/${valid.length})`;
+      try {
+        const files = matchImages(p.sku, p.imagesField);
+        const imagePaths = [];
+        for (let i = 0; i < files.length; i++){
+          const f = files[i];
+          // Run every photo through the same resize/re-encode as Quick Upload, so
+          // CSV-imported photos display just as consistently as manually-added ones.
+          let toUpload = f;
+          try { toUpload = await resizeImageFile(f); } catch (e){ console.error("Resize failed, uploading original:", e); }
+          const path = `${p.sku}/${Date.now()}-${i}.jpg`.replace(/\s+/g, "-");
+          const { error: upErr } = await db.storage.from("product-images").upload(path, toUpload, {
+            upsert: true, contentType: "image/jpeg",
+          });
+          if (!upErr) imagePaths.push(path);
+        }
+        const record = {
+          sku: p.sku, brand: p.brand, name: p.name, category: p.category, sizes: p.sizes,
+          stock: p.stock, condition: p.condition, fit: p.fit, description: p.description, status: p.status,
+        };
+        if (imagePaths.length) record.images = imagePaths;
+        const { error } = await db.from("products").upsert(record, { onConflict: "sku" });
+        if (error) throw error;
+        done++;
+      } catch (err){
+        console.error(err);
+        failed++;
+      }
+    }
+    statusEl.textContent = `Published ${done}${failed ? `, ${failed} failed` : ""}.`;
+    btn.disabled = false;
+    loadInventory();
+  });
+
+  /* ---------------- Current inventory table ---------------- */
+  async function loadInventory(){
+    const { data, error } = await db.from("products").select("*").order("created_at", { ascending: false });
+    const tbody = $("inv-tbody");
+    if (error){ tbody.innerHTML = `<tr><td colspan="7">${escapeHtml(error.message)}</td></tr>`; return; }
+    inventoryCache = data;
+    renderQuSkuSelect();
+    $("inv-count").textContent = `(${data.length})`;
+    tbody.innerHTML = data.map(p => {
+      const img = p.images && p.images[0] ? productImageUrl(p.images[0]) : "";
+      return `<tr data-id="${p.id}">
+        <td class="imgcell">${img ? `<img src="${img}">` : "&mdash;"}</td>
+        <td class="mono">${escapeHtml(p.sku)}</td>
+        <td>${escapeHtml(p.brand)}<br><span style="color:var(--text-faint);">${escapeHtml(p.name)}</span></td>
+        <td class="mono">${escapeHtml((p.sizes||[]).join("/"))}</td>
+        <td><input class="stock-edit" type="number" min="0" value="${p.stock}" data-field="stock"></td>
+        <td>
+          <select class="status-edit" data-field="status">
+            ${["Available","Few available","Sold"].map(s => `<option ${p.status===s?"selected":""}>${s}</option>`).join("")}
+          </select>
+        </td>
+        <td><button class="icon-btn" data-action="delete">Remove</button></td>
+      </tr>`;
+    }).join("");
+
+    tbody.querySelectorAll("tr").forEach(tr => {
+      const id = tr.dataset.id;
+      tr.querySelectorAll("[data-field]").forEach(inp => {
+        inp.addEventListener("change", async () => {
+          const field = inp.dataset.field;
+          const value = field === "stock" ? parseInt(inp.value, 10) || 0 : inp.value;
+          await db.from("products").update({ [field]: value }).eq("id", id);
+        });
+      });
+      tr.querySelector('[data-action="delete"]').addEventListener("click", async () => {
+        if (!confirm("Remove this listing from the store?")) return;
+        await db.from("products").delete().eq("id", id);
+        loadInventory();
+      });
+    });
+  }
+
+  /* ---------------- Quick photo upload (no CSV) ---------------- */
+  function renderQuSkuSelect(){
+    const sel = $("qu-sku-select");
+    if (!sel) return;
+    const prev = sel.value;
+    sel.innerHTML = inventoryCache.map(p =>
+      `<option value="${escapeHtml(p.sku)}">${escapeHtml(p.sku)} &mdash; ${escapeHtml(p.brand)} ${escapeHtml(p.name)}</option>`
+    ).join("");
+    if (prev && inventoryCache.some(p => p.sku === prev)) sel.value = prev;
+  }
+
+  let quMode = "existing";
+  function setQuMode(mode){
+    quMode = mode;
+    $("qu-mode-existing").classList.toggle("active", mode === "existing");
+    $("qu-mode-new").classList.toggle("active", mode === "new");
+    $("qu-existing-fields").classList.toggle("hidden", mode !== "existing");
+    $("qu-new-fields").classList.toggle("hidden", mode !== "new");
+    $("qu-replace-row").classList.toggle("hidden", mode !== "existing");
+  }
+  $("qu-mode-existing").addEventListener("click", () => setQuMode("existing"));
+  $("qu-mode-new").addEventListener("click", () => setQuMode("new"));
+
+  // Resize/re-encode client-side so every photo is a consistent, clean size —
+  // aspect ratio is always preserved (never stretched), only downsized if it's
+  // larger than the cap, and re-saved as a decent-quality JPEG.
+  function resizeImageFile(file, maxDim = 1600, quality = 0.86){
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim){
+          if (width >= height){ height = Math.round(height * (maxDim / width)); width = maxDim; }
+          else { width = Math.round(width * (maxDim / height)); height = maxDim; }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width; canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        canvas.toBlob(blob => {
+          URL.revokeObjectURL(url);
+          if (!blob){ reject(new Error("Could not process image")); return; }
+          resolve(blob);
+        }, "image/jpeg", quality);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Could not read image")); };
+      img.src = url;
+    });
+  }
+
+  function renderQuThumbs(){
+    $("qu-thumbs").innerHTML = quFiles.map((f, i) =>
+      `<div class="qu-thumb"><img src="${URL.createObjectURL(f)}"><span class="rm" data-i="${i}">&times;</span></div>`
+    ).join("");
+    $("qu-thumbs").querySelectorAll(".rm").forEach(el => {
+      el.addEventListener("click", () => {
+        quFiles.splice(parseInt(el.dataset.i, 10), 1);
+        renderQuThumbs();
+      });
+    });
+    $("qu-dropzone-text").textContent = quFiles.length
+      ? `${quFiles.length} photo${quFiles.length === 1 ? "" : "s"} selected &mdash; click to change`
+      : "Click to choose photos, or drag & drop — up to 10";
+  }
+
+  function addQuFiles(fileList){
+    const incoming = Array.from(fileList).filter(f => f.type.startsWith("image/"));
+    quFiles = [...quFiles, ...incoming].slice(0, 10);
+    renderQuThumbs();
+  }
+
+  $("qu-photo-input").addEventListener("change", e => addQuFiles(e.target.files));
+  const dz = $("qu-dropzone");
+  ["dragenter","dragover"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add("drag"); }));
+  ["dragleave","drop"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove("drag"); }));
+  dz.addEventListener("drop", e => { if (e.dataTransfer.files.length) addQuFiles(e.dataTransfer.files); });
+
+  $("qu-upload-btn").addEventListener("click", async () => {
+    const statusEl = $("qu-status");
+    const btn = $("qu-upload-btn");
+
+    if (!quFiles.length){ statusEl.textContent = "Choose at least one photo first."; return; }
+
+    let sku, record;
+    if (quMode === "existing"){
+      sku = $("qu-sku-select").value;
+      if (!sku){ statusEl.textContent = "No item selected — add inventory first, or switch to “Create new item.”"; return; }
+      record = { sku };
+    } else {
+      sku = $("qu-new-sku").value.trim();
+      const brand = $("qu-new-brand").value.trim();
+      const name = $("qu-new-name").value.trim();
+      if (!sku || !brand || !name){ statusEl.textContent = "SKU, brand and product name are required."; return; }
+      const sizes = $("qu-new-sizes").value.split(/[\/,;]+/).map(s => s.trim()).filter(Boolean);
+      const qty = parseInt($("qu-new-qty").value, 10) || 0;
+      record = {
+        sku, brand, name,
+        category: $("qu-new-category").value.trim() || "Uncategorized",
+        sizes, stock: qty,
+        condition: $("qu-new-condition").value.trim(),
+        status: qty <= 3 ? "Few available" : "Available",
+      };
+    }
+
+    btn.disabled = true;
+    try {
+      const imagePaths = [];
+      for (let i = 0; i < quFiles.length; i++){
+        statusEl.textContent = `Processing photo ${i + 1}/${quFiles.length}…`;
+        const resized = await resizeImageFile(quFiles[i]);
+        const path = `${sku}/${Date.now()}-${i}.jpg`.replace(/\s+/g, "-");
+        statusEl.textContent = `Uploading photo ${i + 1}/${quFiles.length}…`;
+        const { error: upErr } = await db.storage.from("product-images").upload(path, resized, {
+          upsert: true, contentType: "image/jpeg",
+        });
+        if (upErr) throw upErr;
+        imagePaths.push(path);
+      }
+
+      if (quMode === "existing"){
+        const existing = inventoryCache.find(p => p.sku === sku);
+        const replace = $("qu-replace").checked;
+        record.images = replace ? imagePaths : [...((existing && existing.images) || []), ...imagePaths];
+      } else {
+        record.images = imagePaths;
+      }
+
+      const { error } = await db.from("products").upsert(record, { onConflict: "sku" });
+      if (error) throw error;
+
+      statusEl.textContent = `Done — ${imagePaths.length} photo${imagePaths.length === 1 ? "" : "s"} live on ${sku}.`;
+      quFiles = [];
+      renderQuThumbs();
+      if (quMode === "new"){
+        ["qu-new-sku","qu-new-brand","qu-new-name","qu-new-category","qu-new-sizes","qu-new-condition"].forEach(id => $(id).value = "");
+        $("qu-new-qty").value = "1";
+      }
+      loadInventory();
+    } catch (err){
+      console.error(err);
+      statusEl.textContent = `Failed: ${err.message || err}`;
+    }
+    btn.disabled = false;
+  });
+
+  init();
+</script>
+</body>
+</html>
