@@ -25,8 +25,17 @@
   }
   .search-input::placeholder{ color:var(--text-faint); }
   .search-input:focus{ outline:none; border-color:var(--teal); }
-  .pills{ display:flex; gap:8px; flex-wrap:wrap; }
+  /* Single scrolling row instead of wrapping — keeps the toolbar from growing
+     taller as more categories get added, and stops it from burying the
+     product grid on narrow phone screens. */
+  .pills{
+    display:flex; flex-wrap:nowrap; gap:8px;
+    overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch;
+    scrollbar-width:none; padding-bottom:2px; margin:0 -24px; padding-left:24px; padding-right:24px;
+  }
+  .pills::-webkit-scrollbar{ display:none; }
   .pill{
+    flex:none; white-space:nowrap;
     font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:0.05em; text-transform:uppercase;
     padding:8px 13px; border:1px solid var(--border); border-radius:100px; color:var(--text-muted);
     transition:all .15s ease;
