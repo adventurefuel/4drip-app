@@ -44,6 +44,33 @@
   .pill.active{ background:var(--yellow); color:var(--yellow-ink); border-color:var(--yellow); font-weight:600; }
   .result-count{ margin-top:12px; font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-faint); }
 
+  /* ---------- LAYOUT: sidebar categories on desktop, scrolling pill row on mobile ---------- */
+  .shop-layout{ display:flex; gap:32px; align-items:flex-start; }
+  .shop-main{ flex:1; min-width:0; }
+  .sidebar{ display:none; }
+
+  @media (min-width:860px){
+    .sidebar{
+      display:block; flex:none; width:196px;
+      position:sticky; top:100px;
+      padding-top:30px;
+    }
+    .sidebar-title{
+      font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:0.1em; text-transform:uppercase;
+      color:var(--text-faint); margin-bottom:14px;
+    }
+    .sidebar-pills{ display:flex; flex-direction:column; gap:2px; }
+    .sidebar-pill{
+      display:block; width:100%; text-align:left; padding:10px 12px; border-radius:2px;
+      font-family:"JetBrains Mono",monospace; font-size:12.5px; letter-spacing:0.02em; color:var(--text-muted);
+      border-left:2px solid transparent; transition:all .15s ease;
+    }
+    .sidebar-pill:hover{ color:var(--text); background:var(--bg-1); }
+    .sidebar-pill.active{ color:var(--yellow); background:var(--bg-1); border-left-color:var(--yellow); font-weight:600; }
+    /* the horizontal pill row is mobile-only — the sidebar replaces it on desktop */
+    .toolbar .pills{ display:none; }
+  }
+
   .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:16px; padding:28px 0 20px; }
   .card{
     background:var(--bg-1); border:1px solid var(--border); border-radius:3px; overflow:hidden;
@@ -180,15 +207,24 @@
     <p class="shop-sub">Authenticated resale plus our own line. Find something you like, then message us on WhatsApp — we'll confirm sizing and availability directly.</p>
   </div>
 
-  <div class="toolbar">
-    <div class="search-row">
-      <input class="search-input" id="search" type="text" placeholder="Search brand, item, size, or SKU&hellip;" autocomplete="off">
-    </div>
-    <div class="pills" id="pills"></div>
-    <div class="result-count" id="result-count"></div>
-  </div>
+  <div class="shop-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-title">Categories</div>
+      <div class="sidebar-pills" id="sidebar-pills"></div>
+    </aside>
 
-  <div id="grid" class="grid"></div>
+    <div class="shop-main">
+      <div class="toolbar">
+        <div class="search-row">
+          <input class="search-input" id="search" type="text" placeholder="Search brand, item, size, or SKU&hellip;" autocomplete="off">
+        </div>
+        <div class="pills" id="pills"></div>
+        <div class="result-count" id="result-count"></div>
+      </div>
+
+      <div id="grid" class="grid"></div>
+    </div>
+  </div>
 </div>
 
 <div class="lightbox" id="lightbox">
@@ -378,7 +414,12 @@
     document.getElementById("pills").innerHTML = cats.map(c =>
       `<button class="pill${c === activeCat ? " active" : ""}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`
     ).join("");
-    document.querySelectorAll(".pill").forEach(btn => {
+    // Same categories, rendered again as a vertical list for the desktop sidebar —
+    // CSS decides which one is actually visible at a given screen size.
+    document.getElementById("sidebar-pills").innerHTML = cats.map(c =>
+      `<button class="sidebar-pill${c === activeCat ? " active" : ""}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`
+    ).join("");
+    document.querySelectorAll(".pill, .sidebar-pill").forEach(btn => {
       btn.addEventListener("click", () => { activeCat = btn.dataset.cat; render(); });
     });
   }
